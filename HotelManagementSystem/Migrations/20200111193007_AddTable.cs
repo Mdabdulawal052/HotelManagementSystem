@@ -2,12 +2,26 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace HotelManagementSystem.Data.Migrations
+namespace HotelManagementSystem.Migrations
 {
-    public partial class CreateIdentitySchema : Migration
+    public partial class AddTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AccomodationTypes",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccomodationTypes", x => x.ID);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -45,6 +59,28 @@ namespace HotelManagementSystem.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AccomodationPackages",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(nullable: true),
+                    NoOfRoom = table.Column<int>(nullable: false),
+                    FeeForNight = table.Column<decimal>(nullable: false),
+                    AccomodationTypeID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccomodationPackages", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_AccomodationPackages_AccomodationTypes_AccomodationTypeID",
+                        column: x => x.AccomodationTypeID,
+                        principalTable: "AccomodationTypes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -153,6 +189,58 @@ namespace HotelManagementSystem.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Accomodations",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    AccomodationPackageID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Accomodations", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Accomodations_AccomodationPackages_AccomodationPackageID",
+                        column: x => x.AccomodationPackageID,
+                        principalTable: "AccomodationPackages",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Bookings",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    FromDate = table.Column<DateTime>(nullable: false),
+                    Duration = table.Column<int>(nullable: false),
+                    AccomodationID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bookings", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Bookings_Accomodations_AccomodationID",
+                        column: x => x.AccomodationID,
+                        principalTable: "Accomodations",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccomodationPackages_AccomodationTypeID",
+                table: "AccomodationPackages",
+                column: "AccomodationTypeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Accomodations_AccomodationPackageID",
+                table: "Accomodations",
+                column: "AccomodationPackageID");
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -191,6 +279,11 @@ namespace HotelManagementSystem.Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bookings_AccomodationID",
+                table: "Bookings",
+                column: "AccomodationID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -211,10 +304,22 @@ namespace HotelManagementSystem.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Bookings");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Accomodations");
+
+            migrationBuilder.DropTable(
+                name: "AccomodationPackages");
+
+            migrationBuilder.DropTable(
+                name: "AccomodationTypes");
         }
     }
 }
